@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="recordMapper">
+	<insert id="writeRecord" parameterType="Record">
+		INSERT INTO RECORD(
+			RECORD_SEQ,
+			USER_RECORD,
+			DIFFICULTY,
+			USERID
+		)
+		VALUES(
+			RECORD_SEQ.nextVal,
+			TO_DATE('2009/04/17 ${userRecord}','yyyy/mm/dd hh24:mi:ss'),
+			#{difficulty},
+			#{userId}
+		)
+	</insert>
+	
+	<select id="getAllRecord" resultType="Record">
+		select f.difficulty, f.minTime as userRecord, r.userid
+		from(
+			select min(userRecord) as minTime, difficulty
+			from(
+				SELECT
+				        TO_CHAR(USER_RECORD, 'hh24:mi:ss') as userRecord,
+				        DIFFICULTY as difficulty,
+				        USERID as userId
+				FROM RECORD
+			)
+			GROUP BY
+			        difficulty
+		) f, RECORD r
+		where
+		        f.minTime = TO_CHAR(r.USER_RECORD, 'hh24:mi:ss') AND f.difficulty = r.difficulty
+		ORDER BY f.difficulty
+	</select>
+
+</mapper>
